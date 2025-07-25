@@ -26,6 +26,15 @@
                     <button onclick="selectShape('umbrella')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Umbrella</button>
                 </div>
             </div>
+            <div class="relative dropdown">
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Select Category</button>
+                <div class="dropdown-menu absolute bg-white shadow-lg rounded mt-2 z-10 max-h-60 overflow-y-auto">
+                    <button onclick="selectCategory('numbers')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Numbers (0-9)</button>
+                    <button onclick="selectCategory('uppercase')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Alphabet Uppercase (A-Z)</button>
+                    <button onclick="selectCategory('lowercase')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Alphabet Lowercase (a-z)</button>
+                    <button onclick="selectCategory('random')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Random</button>
+                </div>
+            </div>
             <button onclick="toggleSettings()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Settings</button>
             <button onclick="resetCanvas()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Reset</button>
         </div>
@@ -50,6 +59,9 @@
         let points = [];
         let selectedShape = null;
         let showTemplate = true;
+        let selectedCategory = null;
+        let currentIndex = 0;
+        let categoryItems = [];
 
         // Shape definitions
         const shapeTemplates = {
@@ -57,7 +69,69 @@
             triangle: generateTrianglePoints(150, 150, 100, 100),
             square: generateSquarePoints(150, 150, 100, 100),
             star: generateStarPoints(150, 150, 100, 50, 100),
-            umbrella: generateUmbrellaPoints(150, 150, 100, 100)
+            umbrella: generateUmbrellaPoints(150, 150, 100, 100),
+            '0': generateNumberPoints('0'),
+            '1': generateNumberPoints('1'),
+            '2': generateNumberPoints('2'),
+            '3': generateNumberPoints('3'),
+            '4': generateNumberPoints('4'),
+            '5': generateNumberPoints('5'),
+            '6': generateNumberPoints('6'),
+            '7': generateNumberPoints('7'),
+            '8': generateNumberPoints('8'),
+            '9': generateNumberPoints('9'),
+            'A': generateLetterPoints('A', true),
+            'B': generateLetterPoints('B', true),
+            'C': generateLetterPoints('C', true),
+            'D': generateLetterPoints('D', true),
+            'E': generateLetterPoints('E', true),
+            'F': generateLetterPoints('F', true),
+            'G': generateLetterPoints('G', true),
+            'H': generateLetterPoints('H', true),
+            'I': generateLetterPoints('I', true),
+            'J': generateLetterPoints('J', true),
+            'K': generateLetterPoints('K', true),
+            'L': generateLetterPoints('L', true),
+            'M': generateLetterPoints('M', true),
+            'N': generateLetterPoints('N', true),
+            'O': generateLetterPoints('O', true),
+            'P': generateLetterPoints('P', true),
+            'Q': generateLetterPoints('Q', true),
+            'R': generateLetterPoints('R', true),
+            'S': generateLetterPoints('S', true),
+            'T': generateLetterPoints('T', true),
+            'U': generateLetterPoints('U', true),
+            'V': generateLetterPoints('V', true),
+            'W': generateLetterPoints('W', true),
+            'X': generateLetterPoints('X', true),
+            'Y': generateLetterPoints('Y', true),
+            'Z': generateLetterPoints('Z', true),
+            'a': generateLetterPoints('a', false),
+            'b': generateLetterPoints('b', false),
+            'c': generateLetterPoints('c', false),
+            'd': generateLetterPoints('d', false),
+            'e': generateLetterPoints('e', false),
+            'f': generateLetterPoints('f', false),
+            'g': generateLetterPoints('g', false),
+            'h': generateLetterPoints('h', false),
+            'i': generateLetterPoints('i', false),
+            'j': generateLetterPoints('j', false),
+            'k': generateLetterPoints('k', false),
+            'l': generateLetterPoints('l', false),
+            'm': generateLetterPoints('m', false),
+            'n': generateLetterPoints('n', false),
+            'o': generateLetterPoints('o', false),
+            'p': generateLetterPoints('p', false),
+            'q': generateLetterPoints('q', false),
+            'r': generateLetterPoints('r', false),
+            's': generateLetterPoints('s', false),
+            't': generateLetterPoints('t', false),
+            'u': generateLetterPoints('u', false),
+            'v': generateLetterPoints('v', false),
+            'w': generateLetterPoints('w', false),
+            'x': generateLetterPoints('x', false),
+            'y': generateLetterPoints('y', false),
+            'z': generateLetterPoints('z', false)
         };
 
         function generateCirclePoints(cx, cy, radius, numPoints) {
@@ -136,7 +210,6 @@
             const points = [];
             const canopyPoints = Math.floor(numPoints * 0.6);
             const handlePoints = numPoints - canopyPoints;
-            // Semi-circle canopy
             for (let i = 0; i < canopyPoints; i++) {
                 const angle = Math.PI * (i / (canopyPoints - 1)) - Math.PI / 2;
                 points.push({
@@ -144,7 +217,6 @@
                     y: cy - (size * 0.5) + (size * 0.5) * Math.sin(angle)
                 });
             }
-            // Handle
             const handleStart = points[points.length - 1];
             const handleEnd = { x: cx, y: cy + size * 0.8 };
             for (let i = 0; i < handlePoints; i++) {
@@ -157,8 +229,499 @@
             return points;
         }
 
+        function generateNumberPoints(number) {
+            const cx = 150, cy = 150, size = 100, numPoints = 100;
+            const points = [];
+            const segmentPoints = Math.floor(numPoints / 7);
+            const halfSize = size / 2;
+            const shapes = {
+                '0': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy - halfSize } // Close loop
+                ],
+                '1': [
+                    { x: cx, y: cy - halfSize }, // Top
+                    { x: cx, y: cy + halfSize } // Bottom
+                ],
+                '2': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                '3': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize } // Bottom-left
+                ],
+                '4': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                '5': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize } // Bottom-left
+                ],
+                '6': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy } // Middle-left
+                ],
+                '7': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                '8': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                '9': [
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy } // Middle-left
+                ]
+            };
+            const vertices = shapes[number];
+            const segments = vertices.length - 1;
+            const pointsPerSegment = Math.floor(numPoints / segments);
+            for (let i = 0; i < segments; i++) {
+                const start = vertices[i];
+                const end = vertices[i + 1];
+                for (let j = 0; j < pointsPerSegment; j++) {
+                    const t = j / pointsPerSegment;
+                    points.push({
+                        x: start.x + t * (end.x - start.x),
+                        y: start.y + t * (end.y - start.y)
+                    });
+                }
+            }
+            return points;
+        }
+
+        function generateLetterPoints(letter, isUppercase) {
+            const cx = 150, cy = 150, size = 100, numPoints = 100;
+            const points = [];
+            const halfSize = size / 2;
+            const shapes = isUppercase ? {
+                'A': [
+                    { x: cx, y: cy - halfSize }, // Top
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx, y: cy - halfSize }, // Back to top
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy } // Middle-right
+                ],
+                'B': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize } // Top-left
+                ],
+                'C': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'D': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize } // Top-left
+                ],
+                'E': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'F': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx - halfSize, y: cy + halfSize } // Bottom-left
+                ],
+                'G': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx, y: cy } // Middle-center
+                ],
+                'H': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'I': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx, y: cy - halfSize }, // Top-center
+                    { x: cx, y: cy + halfSize }, // Bottom-center
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'J': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy } // Middle-left
+                ],
+                'K': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'L': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'M': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx, y: cy }, // Middle-center
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy - halfSize } // Top-right
+                ],
+                'N': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'O': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy - halfSize } // Top-left
+                ],
+                'P': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy } // Middle-left
+                ],
+                'Q': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx, y: cy }, // Middle-center
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'R': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ],
+                'S': [
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx + halfSize, y: cy }, // Middle-right
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize } // Bottom-left
+                ],
+                'T': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx, y: cy - halfSize }, // Top-center
+                    { x: cx, y: cy + halfSize } // Bottom-center
+                ],
+                'U': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize, y: cy - halfSize } // Top-right
+                ],
+                'V': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx, y: cy + halfSize }, // Bottom-center
+                    { x: cx + halfSize, y: cy - halfSize } // Top-right
+                ],
+                'W': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left-middle
+                    { x: cx, y: cy }, // Middle-center
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right-middle
+                    { x: cx + halfSize, y: cy - halfSize } // Top-right
+                ],
+                'X': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy - halfSize } // Top-right
+                ],
+                'Y': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx, y: cy }, // Middle-center
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx, y: cy + halfSize } // Bottom-center
+                ],
+                'Z': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize, y: cy + halfSize } // Bottom-right
+                ]
+            } : {
+                'a': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy - halfSize * 0.5 } // Top-right
+                ],
+                'b': [
+                    { x: cx - halfSize, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize, y: cy } // Middle-left
+                ],
+                'c': [
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize } // Bottom-right
+                ],
+                'd': [
+                    { x: cx + halfSize * 0.5, y: cy - halfSize }, // Top-right
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize * 0.5, y: cy } // Middle-left
+                ],
+                'e': [
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize * 0.5, y: cy + halfSize * 0.5 } // Middle-bottom-left
+                ],
+                'f': [
+                    { x: cx - halfSize * 0.5, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy - halfSize * 0.5 } // Top-right
+                ],
+                'g': [
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy + halfSize * 1.5 } // Tail
+                ],
+                'h': [
+                    { x: cx - halfSize * 0.5, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy } // Middle-right
+                ],
+                'i': [
+                    { x: cx, y: cy - halfSize }, // Top-dot
+                    { x: cx, y: cy - halfSize * 0.5 }, // Top-center
+                    { x: cx, y: cy + halfSize } // Bottom-center
+                ],
+                'j': [
+                    { x: cx + halfSize * 0.5, y: cy - halfSize }, // Top-dot
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize * 0.5, y: cy + halfSize } // Bottom-left
+                ],
+                'k': [
+                    { x: cx - halfSize * 0.5, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy - halfSize }, // Top-right
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize } // Bottom-right
+                ],
+                'l': [
+                    { x: cx - halfSize * 0.5, y: cy - halfSize }, // Top-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize } // Bottom-left
+                ],
+                'm': [
+                    { x: cx - halfSize, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-middle-left
+                    { x: cx, y: cy }, // Middle-center
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-middle-right
+                    { x: cx + halfSize, y: cy } // Middle-right
+                ],
+                'n': [
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize } // Bottom-right
+                ],
+                'o': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy } // Middle-left
+                ],
+                'p': [
+                    { x: cx - halfSize * 0.5, y: cy - halfSize * 0.5 }, // Top-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize * 1.5 }, // Tail
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx + halfSize * 0.5, y: cy + halfSize } // Bottom-right
+                ],
+                'q': [
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx + halfSize * 0.5, y: cy + halfSize * 1.5 }, // Tail
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx - halfSize * 0.5, y: cy } // Middle-left
+                ],
+                'r': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy } // Middle-right
+                ],
+                's': [
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy + halfSize * 0.5 } // Middle-bottom-right
+                ],
+                't': [
+                    { x: cx - halfSize * 0.5, y: cy - halfSize }, // Top-left
+                    { x: cx + halfSize * 0.5, y: cy - halfSize }, // Top-right
+                    { x: cx, y: cy - halfSize }, // Top-center
+                    { x: cx, y: cy + halfSize } // Bottom-center
+                ],
+                'u': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy } // Middle-right
+                ],
+                'v': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx, y: cy + halfSize }, // Bottom-center
+                    { x: cx + halfSize * 0.5, y: cy } // Middle-right
+                ],
+                'w': [
+                    { x: cx - halfSize, y: cy }, // Middle-left
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left-middle
+                    { x: cx, y: cy + halfSize * 0.5 }, // Middle-bottom-center
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right-middle
+                    { x: cx + halfSize, y: cy } // Middle-right
+                ],
+                'x': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize }, // Bottom-right
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy + halfSize } // Bottom-left
+                ],
+                'y': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx, y: cy + halfSize }, // Bottom-center
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx, y: cy + halfSize * 1.5 } // Tail
+                ],
+                'z': [
+                    { x: cx - halfSize * 0.5, y: cy }, // Middle-left
+                    { x: cx + halfSize * 0.5, y: cy }, // Middle-right
+                    { x: cx - halfSize * 0.5, y: cy + halfSize }, // Bottom-left
+                    { x: cx + halfSize * 0.5, y: cy + halfSize } // Bottom-right
+                ]
+            };
+            const vertices = shapes[letter];
+            const segments = vertices.length - 1;
+            const pointsPerSegment = Math.floor(numPoints / segments);
+            for (let i = 0; i < segments; i++) {
+                const start = vertices[i];
+                const end = vertices[i + 1];
+                for (let j = 0; j < pointsPerSegment; j++) {
+                    const t = j / pointsPerSegment;
+                    points.push({
+                        x: start.x + t * (end.x - start.x),
+                        y: start.y + t * (end.y - start.y)
+                    });
+                }
+            }
+            return points;
+        }
+
         function selectShape(shape) {
             selectedShape = shape;
+            selectedCategory = null; // Clear category selection
+            currentIndex = 0;
+            resetCanvas();
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            selectedShape = null; // Clear shape selection
+            if (category === 'numbers') {
+                categoryItems = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            } else if (category === 'uppercase') {
+                categoryItems = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            } else if (category === 'lowercase') {
+                categoryItems = 'abcdefghijklmnopqrstuvwxyz'.split('');
+            } else if (category === 'random') {
+                const allItems = [
+                    ...'0123456789'.split(''),
+                    ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+                    ...'abcdefghijklmnopqrstuvwxyz'.split('')
+                ];
+                categoryItems = allItems.sort(() => Math.random() - 0.5);
+            }
+            currentIndex = 0;
+            selectedShape = categoryItems[currentIndex];
             resetCanvas();
         }
 
@@ -175,6 +738,19 @@
             if (selectedShape && showTemplate) {
                 drawTemplate(shapeTemplates[selectedShape]);
             }
+            if (selectedCategory && currentIndex < categoryItems.length - 1) {
+                currentIndex++;
+                selectedShape = categoryItems[currentIndex];
+                if (showTemplate) {
+                    drawTemplate(shapeTemplates[selectedShape]);
+                }
+            } else if (selectedCategory) {
+                currentIndex = 0;
+                selectedShape = categoryItems[currentIndex];
+                if (showTemplate) {
+                    drawTemplate(shapeTemplates[selectedShape]);
+                }
+            }
         }
 
         function drawTemplate(templatePoints) {
@@ -184,7 +760,6 @@
             for (let i = 1; i < templatePoints.length; i++) {
                 ctx.lineTo(templatePoints[i].x, templatePoints[i].y);
             }
-            ctx.closePath();
             ctx.stroke();
         }
 
