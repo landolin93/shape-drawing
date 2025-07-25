@@ -23,7 +23,6 @@
                     <button onclick="selectShape('triangle')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Triangle</button>
                     <button onclick="selectShape('square')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Square</button>
                     <button onclick="selectShape('star')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Star</button>
-                    <button onclick="selectShape('umbrella')" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 w-full text-left">Umbrella</button>
                 </div>
             </div>
             <div class="relative dropdown">
@@ -69,7 +68,6 @@
             triangle: generateTrianglePoints(150, 150, 100, 100),
             square: generateSquarePoints(150, 150, 100, 100),
             star: generateStarPoints(150, 150, 100, 50, 100),
-            umbrella: generateUmbrellaPoints(150, 150, 100, 100),
             '0': generateNumberPoints('0'),
             '1': generateNumberPoints('1'),
             '2': generateNumberPoints('2'),
@@ -201,29 +199,6 @@
                 points.push({
                     x: cx + radius * Math.cos(angle),
                     y: cy + radius * Math.sin(angle)
-                });
-            }
-            return points;
-        }
-
-        function generateUmbrellaPoints(cx, cy, size, numPoints) {
-            const points = [];
-            const canopyPoints = Math.floor(numPoints * 0.6);
-            const handlePoints = numPoints - canopyPoints;
-            for (let i = 0; i < canopyPoints; i++) {
-                const angle = Math.PI * (i / (canopyPoints - 1)) - Math.PI / 2;
-                points.push({
-                    x: cx + (size * 0.8) * Math.cos(angle),
-                    y: cy - (size * 0.5) + (size * 0.5) * Math.sin(angle)
-                });
-            }
-            const handleStart = points[points.length - 1];
-            const handleEnd = { x: cx, y: cy + size * 0.8 };
-            for (let i = 0; i < handlePoints; i++) {
-                const t = i / (handlePoints - 1);
-                points.push({
-                    x: handleStart.x + t * (handleEnd.x - handleStart.x),
-                    y: handleStart.y + t * (handleEnd.y - handleStart.y)
                 });
             }
             return points;
